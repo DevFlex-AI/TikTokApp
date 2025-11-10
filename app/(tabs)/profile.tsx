@@ -1,7 +1,7 @@
 import ProfileHeader from '@/components/ProfileHeader';
 import { colors } from '@/constants/colors';
-import { mockVideos } from '@/mocks/videos';
 import { useAuthStore } from '@/store/authStore';
+import { useVideoStore } from '@/store/videoStore';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { Bookmark, Grid, Lock, LogOut } from 'lucide-react-native';
@@ -18,11 +18,12 @@ import {
 export default function ProfileScreen() {
   const router = useRouter();
   const { user, logout } = useAuthStore();
+  const { videos } = useVideoStore();
   const [activeTab, setActiveTab] = useState('videos');
 
   if (!user) return null;
 
-  const userVideos = mockVideos.filter(video => video.userId === user.id);
+  const userVideos = videos.filter(video => video.userId === user.id);
 
   const handleEditProfile = () => {
     router.push('/edit-profile');
@@ -36,7 +37,7 @@ export default function ProfileScreen() {
     logout();
   };
 
-  const renderVideoItem = ({ item }: { item: typeof mockVideos[0] }) => (
+  const renderVideoItem = ({ item }: { item: typeof videos[0] }) => (
     <TouchableOpacity
       style={styles.videoItem}
       onPress={() => handleVideoPress(item.id)}

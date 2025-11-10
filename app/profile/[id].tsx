@@ -1,8 +1,8 @@
 import ProfileHeader from '@/components/ProfileHeader';
 import { colors } from '@/constants/colors';
-import { mockUsers } from '@/mocks/users';
-import { mockVideos } from '@/mocks/videos';
+import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/store/authStore';
+import { useVideoStore } from '@/store/videoStore';
 import { User } from '@/types';
 import { Image } from 'expo-image';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
@@ -22,22 +22,36 @@ export default function UserProfileScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { user: currentUser } = useAuthStore();
+  const { videos } = useVideoStore();
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('videos');
   const [isFollowing, setIsFollowing] = useState(false);
 
   useEffect(() => {
-    // In a real app, we would fetch the user data from an API
     const fetchUser = async () => {
       setIsLoading(true);
       try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 500));
+        const { data, error } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', id)
+          .maybeSingle();
 
-        const foundUser = mockUsers.find(u => u.id === id);
-        if (foundUser) {
-          setUser(foundUser);
+        if (error) throw error;
+
+        if (data) {
+          setUser({
+            id: data.id,
+            username: data.username,
+            email: data.email,
+            displayName: data.display_name,
+            photoURL: data.photo_url,
+            bio: data.bio,
+            followers: data.followers,
+            following: data.following,
+            createdAt: new Date(data.created_at).getTime(),
+          });
         }
       } catch (error) {
         console.error('Error fetching user:', error);
@@ -49,7 +63,7 @@ export default function UserProfileScreen() {
     fetchUser();
   }, [id]);
 
-  const userVideos = mockVideos.filter(video => video.userId === id);
+  const userVideos = videos.filter(video => video.userId === id);
 
   const handleVideoPress = (videoId: string) => {
     router.push(`/video/${videoId}`);
@@ -64,7 +78,7 @@ export default function UserProfileScreen() {
     router.push('/chat/chat1');
   };
 
-  const renderVideoItem = ({ item }: { item: typeof mockVideos[0] }) => (
+  const renderVideoItem = ({ item }: { item: typeof videos[0] }) => (
     <TouchableOpacity
       style={styles.videoItem}
       onPress={() => handleVideoPress(item.id)}

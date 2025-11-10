@@ -1,4 +1,5 @@
 import { colors } from '@/constants/colors';
+import LiquidGlassTabBar from '@/components/LiquidGlassTabBar';
 import { useAuthStore } from '@/store/authStore';
 import { useNotificationStore } from '@/store/notificationStore';
 import { Tabs } from 'expo-router';
@@ -17,17 +18,11 @@ export default function TabLayout() {
 
   return (
     <Tabs
+      tabBar={(props) => <LiquidGlassTabBar {...props} />}
       screenOptions={{
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.black,
         tabBarShowLabel: false,
-        tabBarStyle: {
-          borderTopWidth: 0.5,
-          borderTopColor: colors.lightGray,
-          backgroundColor: colors.white,
-          height: 55,
-          paddingTop: 7,
-        },
         headerStyle: {
           backgroundColor: colors.white,
         },

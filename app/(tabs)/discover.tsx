@@ -1,9 +1,9 @@
 import { colors } from '@/constants/colors';
-import { mockVideos } from '@/mocks/videos';
+import { useVideoStore } from '@/store/videoStore';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { Search, TrendingUp } from 'lucide-react-native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   FlatList,
   ScrollView,
@@ -22,12 +22,17 @@ export default function DiscoverScreen() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('For You');
+  const { videos, fetchVideos } = useVideoStore();
+
+  useEffect(() => {
+    fetchVideos();
+  }, []);
 
   const handleVideoPress = (videoId: string) => {
     router.push(`/video/${videoId}`);
   };
 
-  const renderVideoItem = ({ item }: { item: typeof mockVideos[0] }) => (
+  const renderVideoItem = ({ item }: { item: typeof videos[0] }) => (
     <TouchableOpacity
       style={styles.videoItem}
       onPress={() => handleVideoPress(item.id)}
@@ -98,7 +103,7 @@ export default function DiscoverScreen() {
       )}
 
       <FlatList
-        data={mockVideos}
+        data={videos}
         renderItem={renderVideoItem}
         keyExtractor={(item) => item.id}
         numColumns={2}

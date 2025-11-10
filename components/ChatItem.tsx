@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Image } from 'expo-image';
 import { colors } from '@/constants/colors';
 import { Chat } from '@/types';
-import { mockUsers } from '@/mocks/users';
+import { supabase } from '@/lib/supabase';
 
 interface ChatItemProps {
   chat: Chat;
@@ -12,9 +12,30 @@ interface ChatItemProps {
 }
 
 const ChatItem: React.FC<ChatItemProps> = ({ chat, currentUserId, onPress }) => {
-  // Get the other user in the chat
-  const otherUserId = chat.participants.find(id => id !== currentUserId) || '';
-  const otherUser = mockUsers.find(user => user.id === otherUserId);
+  const [otherUser, setOtherUser] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchOtherUser = async () => {
+      const otherUserId = chat.participants.find(id => id !== currentUserId);
+      if (!otherUserId) return;
+
+      const { data } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', otherUserId)
+        .maybeSingle();
+
+      if (data) {
+        setOtherUser({
+          id: data.id,
+          username: data.username,
+          photoURL: data.photo_url,
+        });
+      }
+    };
+
+    fetchOtherUser();
+  }, [chat.participants, currentUserId]);
 
   if (!otherUser) return null;
 
