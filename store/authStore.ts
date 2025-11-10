@@ -1,4 +1,4 @@
-import { mockUsers } from '@/mocks/users';
+import { supabase } from '@/lib/supabase';
 import { User } from '@/types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
@@ -13,30 +13,73 @@ interface AuthState {
   register: (email: string, password: string, username: string) => Promise<void>;
   logout: () => void;
   updateProfile: (data: Partial<User>) => Promise<void>;
+  initialize: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
       isAuthenticated: false,
       isLoading: false,
       error: null,
 
+      initialize: async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          const { data: userData } = await supabase
+            .from('users')
+            .select('*')
+            .eq('id', session.user.id)
+            .maybeSingle();
+
+          if (userData) {
+            const user: User = {
+              id: userData.id,
+              username: userData.username,
+              email: userData.email,
+              displayName: userData.display_name,
+              photoURL: userData.photo_url,
+              bio: userData.bio,
+              followers: userData.followers,
+              following: userData.following,
+              createdAt: new Date(userData.created_at).getTime(),
+            };
+            set({ user, isAuthenticated: true });
+          }
+        }
+      },
+
       login: async (email, password) => {
         set({ isLoading: true, error: null });
         try {
-          // Simulate API call
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+          });
 
-          // Mock login - in a real app, this would be a Firebase Auth call
-          const user = mockUsers.find(u => u.email === email);
+          if (authError) throw authError;
 
-          if (!user) {
-            throw new Error('Invalid email or password');
+          const { data: userData } = await supabase
+            .from('users')
+            .select('*')
+            .eq('id', authData.user.id)
+            .maybeSingle();
+
+          if (userData) {
+            const user: User = {
+              id: userData.id,
+              username: userData.username,
+              email: userData.email,
+              displayName: userData.display_name,
+              photoURL: userData.photo_url,
+              bio: userData.bio,
+              followers: userData.followers,
+              following: userData.following,
+              createdAt: new Date(userData.created_at).getTime(),
+            };
+            set({ user, isAuthenticated: true, isLoading: false });
           }
-
-          set({ user, isAuthenticated: true, isLoading: false });
         } catch (error) {
           set({
             error: error instanceof Error ? error.message : 'An error occurred',
@@ -48,21 +91,28 @@ export const useAuthStore = create<AuthState>()(
       register: async (email, password, username) => {
         set({ isLoading: true, error: null });
         try {
-          // Simulate API call
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          const { data: authData, error: authError } = await supabase.auth.signUp({
+            email,
+            password,
+          });
 
-          // Check if email or username already exists
-          if (mockUsers.some(u => u.email === email)) {
-            throw new Error('Email already in use');
-          }
+          if (authError) throw authError;
+          if (!authData.user) throw new Error('Registration failed');
 
-          if (mockUsers.some(u => u.username === username)) {
-            throw new Error('Username already taken');
-          }
+          const { error: insertError } = await supabase
+            .from('users')
+            .insert({
+              id: authData.user.id,
+              username,
+              email,
+              display_name: username,
+              photo_url: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde',
+            });
 
-          // Create new user - in a real app, this would be a Firebase Auth call
+          if (insertError) throw insertError;
+
           const newUser: User = {
-            id: `user${mockUsers.length + 1}`,
+            id: authData.user.id,
             username,
             email,
             displayName: username,
@@ -82,15 +132,29 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      logout: () => {
+      logout: async () => {
+        await supabase.auth.signOut();
         set({ user: null, isAuthenticated: false });
       },
 
       updateProfile: async (data) => {
         set({ isLoading: true, error: null });
         try {
-          // Simulate API call
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          const currentUser = get().user;
+          if (!currentUser) throw new Error('No user logged in');
+
+          const updateData: any = {};
+          if (data.username) updateData.username = data.username;
+          if (data.displayName) updateData.display_name = data.displayName;
+          if (data.bio !== undefined) updateData.bio = data.bio;
+          if (data.photoURL) updateData.photo_url = data.photoURL;
+
+          const { error } = await supabase
+            .from('users')
+            .update(updateData)
+            .eq('id', currentUser.id);
+
+          if (error) throw error;
 
           set(state => ({
             user: state.user ? { ...state.user, ...data } : null,

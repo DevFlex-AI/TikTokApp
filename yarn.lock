@@ -1595,6 +1595,55 @@
   dependencies:
     "@sinonjs/commons" "^3.0.0"
 
+"@supabase/auth-js@2.81.0":
+  version "2.81.0"
+  resolved "https://registry.npmjs.org/@supabase/auth-js/-/auth-js-2.81.0.tgz"
+  integrity sha512-mWyRPO+XUo19MHNBFg5qdH8cMIyxRNj9HXhwkwToxDHYRZWru96hWZFCVb7trOrTpPVe4TgLer2yy3KMvYBMPw==
+  dependencies:
+    tslib "2.8.1"
+
+"@supabase/functions-js@2.81.0":
+  version "2.81.0"
+  resolved "https://registry.npmjs.org/@supabase/functions-js/-/functions-js-2.81.0.tgz"
+  integrity sha512-yxxIGbXm1TtRpP5VwXKEZIdQMd2XUrWS1xt3zPF3jMItX5dXfdpbz5YRPY3IfebR8gXB113d/APWvYLiNuzI1Q==
+  dependencies:
+    tslib "2.8.1"
+
+"@supabase/postgrest-js@2.81.0":
+  version "2.81.0"
+  resolved "https://registry.npmjs.org/@supabase/postgrest-js/-/postgrest-js-2.81.0.tgz"
+  integrity sha512-HdybTRf5Sy+gBxzgwkag+WkvV8QqMXhnKQ383YG51lCbm8p82CuCcUTzGy2xFHiA2ZXnnlkSzrfw8uKFAiAiog==
+  dependencies:
+    tslib "2.8.1"
+
+"@supabase/realtime-js@2.81.0":
+  version "2.81.0"
+  resolved "https://registry.npmjs.org/@supabase/realtime-js/-/realtime-js-2.81.0.tgz"
+  integrity sha512-WCL9kMbmHQNGAG4ep+jfU22+h9OiQVv7bbkOmLy4gwlqtE+SJszkAtRp3l3xthqYkbxHbIqGc/BlHv3Dh79cXg==
+  dependencies:
+    "@types/phoenix" "^1.6.6"
+    "@types/ws" "^8.18.1"
+    tslib "2.8.1"
+    ws "^8.18.2"
+
+"@supabase/storage-js@2.81.0":
+  version "2.81.0"
+  resolved "https://registry.npmjs.org/@supabase/storage-js/-/storage-js-2.81.0.tgz"
+  integrity sha512-gj9u+EyEVLgDA9jW8JOsAgEc8H79zg01STK5KLv9EU45kf5Qh7kAoCmG090Jkp/YEGvSiaR/Ta7Xs/gUTLqflw==
+  dependencies:
+    tslib "2.8.1"
+
+"@supabase/supabase-js@^2.81.0":
+  version "2.81.0"
+  resolved "https://registry.npmjs.org/@supabase/supabase-js/-/supabase-js-2.81.0.tgz"
+  integrity sha512-FkiqUYCzsT92V/mfvoFueszkQrPqSTHgXhN9ADqeMpY5j0tUqeAZu8g2ptLYiDmx1pBbh4xoiqxWAf3UDIv4Bw==
+  dependencies:
+    "@supabase/auth-js" "2.81.0"
+    "@supabase/functions-js" "2.81.0"
+    "@supabase/postgrest-js" "2.81.0"
+    "@supabase/realtime-js" "2.81.0"
+    "@supabase/storage-js" "2.81.0"
+
 "@tanstack/query-core@5.76.0":
   version "5.76.0"
   resolved "https://registry.npmjs.org/@tanstack/query-core/-/query-core-5.76.0.tgz"
@@ -1693,6 +1742,11 @@
   dependencies:
     undici-types "~6.21.0"
 
+"@types/phoenix@^1.6.6":
+  version "1.6.6"
+  resolved "https://registry.npmjs.org/@types/phoenix/-/phoenix-1.6.6.tgz"
+  integrity sha512-PIzZZlEppgrpoT2QgbnDU+MMzuR6BbCjllj0bM70lWoejMeNJAxCchxnv7J3XFkI8MpygtRpzXrIlmWUBclP5A==
+
 "@types/react@*", "@types/react@^19.0.0", "@types/react@>=18.0.0", "@types/react@~19.0.10":
   version "19.0.14"
   resolved "https://registry.npmjs.org/@types/react/-/react-19.0.14.tgz"
@@ -1704,6 +1758,13 @@
   version "2.0.3"
   resolved "https://registry.npmjs.org/@types/stack-utils/-/stack-utils-2.0.3.tgz"
   integrity sha512-9aEbYZ3TbYMznPdcdr3SmIrLXwC/AKZXQeCf9Pgao5CKb8CyHuEX5jzWPTkvregvhRJHcpRO6BFoGW9ycaOkYw==
+
+"@types/ws@^8.18.1":
+  version "8.18.1"
+  resolved "https://registry.npmjs.org/@types/ws/-/ws-8.18.1.tgz"
+  integrity sha512-ThVF6DCVhA8kUGy+aazFQ4kXQ7E1Ty7A3ypFOe0IcJV8O/M511G99AW24irKrW56Wt44yG9+ij8FaqoBGkuBXg==
+  dependencies:
+    "@types/node" "*"
 
 "@types/yargs-parser@*":
   version "21.0.3"
@@ -6537,6 +6598,11 @@ tsconfig-paths@^3.15.0:
     minimist "^1.2.6"
     strip-bom "^3.0.0"
 
+tslib@2.8.1:
+  version "2.8.1"
+  resolved "https://registry.npmjs.org/tslib/-/tslib-2.8.1.tgz"
+  integrity sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==
+
 type-check@^0.4.0, type-check@~0.4.0:
   version "0.4.0"
   resolved "https://registry.npmjs.org/type-check/-/type-check-0.4.0.tgz"
@@ -6922,7 +6988,7 @@ ws@^7.5.10:
   resolved "https://registry.npmjs.org/ws/-/ws-7.5.10.tgz"
   integrity sha512-+dbF1tHwZpXcbOJdVOkzLDxZP1ailvSxM6ZweXTegylPny803bFhA+vqBYw4s31NSAk4S2Qz+AKXK9a4wkdjcQ==
 
-ws@^8.12.1:
+ws@^8.12.1, ws@^8.18.2:
   version "8.18.2"
   resolved "https://registry.npmjs.org/ws/-/ws-8.18.2.tgz"
   integrity sha512-DMricUmwGZUVr++AEAe2uiVM7UoO9MAVZMDu05UQOaUII0lp+zOzLLU4Xqh/JvTqklB1T4uELaaPBKyjE1r4fQ==

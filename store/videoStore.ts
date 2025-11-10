@@ -1,6 +1,6 @@
+import { supabase } from '@/lib/supabase';
+import { Comment, Video } from '@/types';
 import { create } from 'zustand';
-import { Video, Comment } from '@/types';
-import { mockVideos } from '@/mocks/videos';
 
 interface VideoState {
   videos: Video[];
@@ -24,11 +24,36 @@ export const useVideoStore = create<VideoState>((set, get) => ({
   fetchVideos: async () => {
     set({ isLoading: true, error: null });
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const { data: videosData, error } = await supabase
+        .from('videos')
+        .select(`
+          *,
+          users (
+            id,
+            username,
+            photo_url
+          )
+        `)
+        .order('created_at', { ascending: false });
 
-      // In a real app, this would fetch from Firebase
-      set({ videos: mockVideos, isLoading: false });
+      if (error) throw error;
+
+      const videos: Video[] = videosData?.map((video: any) => ({
+        id: video.id,
+        userId: video.user_id,
+        username: video.users.username,
+        userPhotoURL: video.users.photo_url,
+        videoURL: video.video_url,
+        thumbnailURL: video.thumbnail_url,
+        description: video.description,
+        likes: video.likes,
+        comments: video.comments_count,
+        shares: video.shares,
+        createdAt: new Date(video.created_at).getTime(),
+        hashtags: video.hashtags || [],
+      })) || [];
+
+      set({ videos, isLoading: false });
     } catch (error) {
       set({
         error: error instanceof Error ? error.message : 'An error occurred',
@@ -39,10 +64,24 @@ export const useVideoStore = create<VideoState>((set, get) => ({
 
   likeVideo: async (videoId: string) => {
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
 
-      // Update video likes count
+      const { error: likeError } = await supabase
+        .from('likes')
+        .insert({ user_id: user.id, video_id: videoId });
+
+      if (likeError) {
+        if (likeError.code === '23505') {
+          return;
+        }
+        throw likeError;
+      }
+
+      const { error: updateError } = await supabase.rpc('increment_video_likes', {
+        video_id: videoId
+      });
+
       set(state => ({
         videos: state.videos.map(video =>
           video.id === videoId
@@ -62,21 +101,33 @@ export const useVideoStore = create<VideoState>((set, get) => ({
 
   addComment: async (videoId, userId, username, userPhotoURL, text) => {
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
+      const { data: commentData, error } = await supabase
+        .from('comments')
+        .insert({
+          video_id: videoId,
+          user_id: userId,
+          text
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      await supabase.rpc('increment_video_comments', {
+        video_id: videoId
+      });
 
       const newComment: Comment = {
-        id: `comment${Date.now()}`,
+        id: commentData.id,
         videoId,
         userId,
         username,
         userPhotoURL,
         text,
         likes: 0,
-        createdAt: Date.now(),
+        createdAt: new Date(commentData.created_at).getTime(),
       };
 
-      // Add comment to list
       set(state => ({
         comments: [newComment, ...state.comments],
         videos: state.videos.map(video =>
@@ -98,44 +149,32 @@ export const useVideoStore = create<VideoState>((set, get) => ({
   fetchComments: async (videoId: string) => {
     set({ isLoading: true, error: null });
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const { data: commentsData, error } = await supabase
+        .from('comments')
+        .select(`
+          *,
+          users (
+            username,
+            photo_url
+          )
+        `)
+        .eq('video_id', videoId)
+        .order('created_at', { ascending: false });
 
-      // Mock comments - in a real app, this would fetch from Firebase
-      const mockComments: Comment[] = [
-        {
-          id: 'comment1',
-          videoId,
-          userId: 'user2',
-          username: 'techguy',
-          userPhotoURL: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e',
-          text: 'This is amazing! 🔥',
-          likes: 45,
-          createdAt: Date.now() - 3600000,
-        },
-        {
-          id: 'comment2',
-          videoId,
-          userId: 'user3',
-          username: 'foodlover',
-          userPhotoURL: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80',
-          text: 'Love this content! Keep it up 👏',
-          likes: 23,
-          createdAt: Date.now() - 7200000,
-        },
-        {
-          id: 'comment3',
-          videoId,
-          userId: 'user4',
-          username: 'travelbug',
-          userPhotoURL: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d',
-          text: 'Where was this filmed?',
-          likes: 12,
-          createdAt: Date.now() - 10800000,
-        },
-      ];
+      if (error) throw error;
 
-      set({ comments: mockComments, isLoading: false });
+      const comments: Comment[] = commentsData?.map((comment: any) => ({
+        id: comment.id,
+        videoId: comment.video_id,
+        userId: comment.user_id,
+        username: comment.users.username,
+        userPhotoURL: comment.users.photo_url,
+        text: comment.text,
+        likes: comment.likes,
+        createdAt: new Date(comment.created_at).getTime(),
+      })) || [];
+
+      set({ comments, isLoading: false });
     } catch (error) {
       set({
         error: error instanceof Error ? error.message : 'An error occurred',
